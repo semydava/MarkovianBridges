@@ -82,3 +82,5 @@ ax[0].scatter(y2_d.keys(), y2_d.values(), color = 'green')
 ax[1].plot(z.keys(), z.values(), color = 'blue')
 plt.show()
 
+
+

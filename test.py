@@ -31,6 +31,7 @@ def AR(T, a, b, theta, sigma):
         n2 = discrete_noise()
         X1[i + 1] = X1[i] - theta * X1[i] * dt + sigma * np.sqrt(dt) * n1
         X2[i + 1] = X2[i] - theta * X2[i] * dt + sigma * np.sqrt(dt) * n2
+
     X2 = X2[::-1]
     X1 = list(X1)
     X2 = list(X2)
@@ -62,8 +63,6 @@ def AR(T, a, b, theta, sigma):
             else:
                 z2[idx] = X2[idx]
                 t2.append(t[idx])
-        
-
         
         #stop_time = t[stop_index]
        
@@ -131,6 +130,9 @@ def prob_plot_coef():
     prob_freq1 = []
     prob_freq2 = []
     prob_freq3 = []
+    prob_theta1 = []
+    prob_theta2 = []
+    prob_theta3 = []
     prob_b = []
     i = 0
     sigmas = []
@@ -255,7 +257,4 @@ def prob_plot_aprox():
     ax[1].legend(loc=(0.5, 0.01))
     ax[2].legend(loc=(0.5, 0.01))
     plt.show()
-
-
-
 

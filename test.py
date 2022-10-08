@@ -204,6 +204,7 @@ def prob_plot_time(T, theta, sigma):
     plt.legend(loc=(0.5, 0.01))
     plt.show()
 print(prob_plot_time(10, 1, 1))
+
 def prob_plot_time1(T, theta, sigma):
     prob_freq1 = []
     prob_freq2 = []
@@ -307,3 +308,4 @@ def prob_plot_aprox():
     ax[2].legend(loc=(0.5, 0.01))
     plt.show()
 
+# Some Updates From MAC

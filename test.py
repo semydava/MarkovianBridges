@@ -13,6 +13,7 @@ def discrete_noise():
     elif prob > 0.5:
         y = -1
     return y
+    
 def AR(T, a, b, theta, sigma):
     dt = 0.001
     n = int(T/dt)
@@ -31,6 +32,7 @@ def AR(T, a, b, theta, sigma):
         n2 = discrete_noise()
         X1[i + 1] = X1[i] - theta * X1[i] * dt + sigma * np.sqrt(dt) * n1
         X2[i + 1] = X2[i] - theta * X2[i] * dt + sigma * np.sqrt(dt) * n2
+
     X2 = X2[::-1]
     X1 = list(X1)
     X2 = list(X2)
@@ -131,6 +133,9 @@ def prob_plot_coef():
     prob_freq1 = []
     prob_freq2 = []
     prob_freq3 = []
+    prob_theta1 = []
+    prob_theta2 = []
+    prob_theta3 = []
     prob_b = []
     i = 0
     sigmas = []
@@ -301,7 +306,4 @@ def prob_plot_aprox():
     ax[1].legend(loc=(0.5, 0.01))
     ax[2].legend(loc=(0.5, 0.01))
     plt.show()
-
-
-
 

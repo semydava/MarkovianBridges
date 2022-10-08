@@ -84,7 +84,7 @@ def AR(T, a, b, theta, sigma):
         # # plt.ylabel('X')
         plt.show()
     return intersect
-print(AR(1., 0, 0.5, 3, 0.5))
+print(AR(1., 0, 0.5, 5, 1))
 
 def Monte_Carlo_b1(sim_n,T):
     count = 0

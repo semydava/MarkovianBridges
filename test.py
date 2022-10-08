@@ -307,3 +307,5 @@ def prob_plot_aprox():
     ax[2].legend(loc=(0.5, 0.01))
     plt.show()
 
+
+# Some updates from PC

@@ -85,16 +85,19 @@ def geom_bm(T, a, b, mu, sigma):
     return intersect
 
 #print(geom_bm(1, 1, 3, 1, 1))
+def distance(x1,y1,x2,y2):
+     e1 = (x2 - x1)**2 + (y2 - y1)**2
+     return sqrt(e1)
 
-def Monte_Carlo(sim_n, T, mu, sigma):
+def Monte_Carlo(sim_n, T, a, b):
     count1 = 0
     count2 = 0
     count3 = 0
 
     for i in range(sim_n):
-        inter1 = geom_bm(T, 1, 5, mu, sigma)
-        inter2 = geom_bm(T, 2, 5, mu, sigma)
-        inter3 = geom_bm(T, 3, 7, mu, sigma)
+        inter1 = geom_bm(T, a, b, 1, 1)
+        inter2 = geom_bm(T, a, b, 3, 3)
+        inter3 = geom_bm(T, a, b, 0.5, 0.5)
         count1 += inter1
         count2 += inter2
         count3 += inter3
@@ -105,7 +108,54 @@ def Monte_Carlo(sim_n, T, mu, sigma):
 
     return [prob_inter1, prob_inter2, prob_inter3]
 
-def prob_plot_time(T, mu, sigma):
+def prob_plot_time1(T, a, b):
+    prob_freq1 = []
+    prob_freq2 = []
+    prob_freq3 = []
+    prob_e1 = []
+    prob_e2 = []
+    prob_e3 = []
+    i = 0
+    T_s = []
+    while i <= T:
+        i += 0.05
+        T_s.append(i)
+    for i in T_s:
+        dis1 = distance(0, 1, 2,i)
+        dis2 = distance(0, 1, 2,i)
+        dis3 = distance(0, 1, 2, i)
+        #e = 1 - math.exp(- lam * i)
+        e1 = 1 - math.exp((- 1 * i * dis1)/2)
+        prob_e1.append(e1)
+        e2 = 1 - math.exp((- 9 * i * dis2)/2)
+        prob_e2.append(e2)
+        e3 = 1 - math.exp((- 0.25 * i * dis3)/2)
+        prob_e3.append(e3)
+        print('l')
+        p = Monte_Carlo(300, i, a, b)
+        prob_freq1.append(p[0])
+        prob_freq2.append(p[1])
+        prob_freq3.append(p[2])
+    fig, ax = plt.subplots(3)
+    #plt.title("Probability of stopping time detection")
+    ax[0].set_xlabel('Different time Δ')
+    ax[0].set_ylabel('Probability')
+    ax[1].set_xlabel('Different time Δ')
+    ax[1].set_ylabel('Probability')
+    ax[2].set_xlabel('Different time Δ')
+    ax[2].set_ylabel('Probability')
+    ax[0].plot(T_s, prob_freq1, color="orange", label="Probability of stopping time detection with a = " + str(a) + " and b = " + str(b) + " μ1 = 1 and σ1 = 1")
+    ax[1].plot(T_s, prob_freq2, color="lawngreen", label="Probability of stopping time detection with a = " + str(a) + " and b = " + str(b) + " μ2 = 3 and σ2 = 3")
+    ax[2].plot(T_s, prob_freq3, color="purple", label="Probability of stopping time detection with a = " + str(a) + " and b = " + str(b) + " μ3 = 0.5 and σ3 = 0.5")
+    ax[0].plot(T_s, prob_e1, color="black", label="f(x) = 1 - exp(- λ*Δ/2)")
+    ax[1].plot(T_s, prob_e2, color="black", label="f(x) = 1 - exp(- λ*Δ/2)")
+    ax[2].plot(T_s, prob_e3, color="black", label="f(x) = 1 - exp(- λ*Δ/2)")
+    ax[0].legend(loc=(0.5, 0.01))
+    ax[1].legend(loc=(0.5, 0.01))
+    ax[2].legend(loc=(0.5, 0.01))
+    plt.show()
+#print(prob_plot_time1(10, 1, 2))
+def prob_plot_time(T, a, b):
     prob_freq1 = []
     prob_freq2 = []
     prob_freq3 = []
@@ -121,17 +171,17 @@ def prob_plot_time(T, mu, sigma):
         #e = 1 - math.exp(- theta * i)*sigma**2/theta*2
         #prob_e.append(e)
         print('l')
-        p = Monte_Carlo(35, i, mu, sigma)
+        p = Monte_Carlo(50, i, a, b)
         prob_freq1.append(p[0])
         prob_freq2.append(p[1])
         prob_freq3.append(p[2])
-    plt.title("Probability of stopping time detection")
+    #plt.title("Probability of stopping time detection for Geometric ")
     plt.xlabel('Different time Δ')
     plt.ylabel('Probability')
-    plt.plot(T_s, prob_freq1, color="orange", label="Probability of stopping time detection with a1 = 1, b1 = 5, μ = " + str(mu) + " and σ = " + str(sigma))
-    plt.plot(T_s, prob_freq2, color="lawngreen", label="Probability of stopping time detection with a2 = 2, b2 = 5,  μ = " + str(mu) + " and σ = " + str(sigma))
-    plt.plot(T_s, prob_freq3, color="purple", label="Probability of stopping time detection with a3 = 3, b3 = 7, μ = " + str(mu) + " and σ = " + str(sigma))
+    plt.plot(T_s, prob_freq1, color="orange", label="Probability of stopping time detection with a = " + str(a) + " and b = " + str(b) + " μ1 = 1 and σ1 = 3" )
+    plt.plot(T_s, prob_freq2, color="lawngreen", label="Probability of stopping time detection with a = " + str(a) + " and b = " + str(b) + " μ2 = 3 and σ2 = 3" )
+    plt.plot(T_s, prob_freq3, color="purple", label="Probability of stopping time detection with a = " + str(a) + " and b = " + str(b) + " μ3 = 0.5 and σ3 = 0.5")
     #plt.plot(T_s, prob_e, color="black", label="f(x) = 1 - exp(- λ*Δ)")
     plt.legend(loc=(0.5, 0.01))
     plt.show()
-print(prob_plot_time(5, 1, 1))
+print(prob_plot_time(20, 1, 2))

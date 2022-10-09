@@ -190,7 +190,7 @@ def prob_plot_time(T, theta, sigma):
         e = 1 - math.exp((- theta * i * lam)/2)
         prob_e.append(e)
         print('l')
-        p = Monte_Carlo(500, i, theta, sigma)
+        p = Monte_Carlo(5, i, theta, sigma)
         prob_freq1.append(p[0])
         prob_freq2.append(p[1])
         prob_freq3.append(p[2])
@@ -203,7 +203,7 @@ def prob_plot_time(T, theta, sigma):
     #plt.plot(T_s, prob_e, color="black", label="f(x) = 1 - exp(- λ*Δ)")
     plt.legend(loc=(0.5, 0.01))
     plt.show()
-print(prob_plot_time(10, 1, 1))
+#print(prob_plot_time(10, 1, 1))
 
 def prob_plot_time1(T, theta, sigma):
     prob_freq1 = []
@@ -215,12 +215,12 @@ def prob_plot_time1(T, theta, sigma):
     i = 0
     T_s = []
     while i <= T:
-        i += 0.05
+        i += 0.1
         T_s.append(i)
     for i in T_s:
-        dis1 = distance(0, 0, 0.5,i)
-        dis2 = distance(0, -0.5, 0.5,i)
-        dis3 = distance(0, -0.5, 1,i)
+        dis1 = distance(0, 0,i, 0.5)
+        dis2 = distance(0, -0.5, i, 0.5)
+        dis3 = distance(0, -0.5, i, 1)
         #e = 1 - math.exp(- lam * i)
         e1 = 1 - math.exp((- theta * i * dis1)/2)
         prob_e1.append(e1)
@@ -229,7 +229,7 @@ def prob_plot_time1(T, theta, sigma):
         e3 = 1 - math.exp((- theta * i * dis3)/2)
         prob_e3.append(e3)
         print('l')
-        p = Monte_Carlo(100, i, theta, sigma)
+        p = Monte_Carlo(10, i, theta, sigma)
         prob_freq1.append(p[0])
         prob_freq2.append(p[1])
         prob_freq3.append(p[2])
@@ -251,7 +251,7 @@ def prob_plot_time1(T, theta, sigma):
     ax[1].legend(loc=(0.5, 0.01))
     ax[2].legend(loc=(0.5, 0.01))
     plt.show()
-#print(prob_plot_time1(10, 1, 1))
+print(prob_plot_time1(10, 1, 1))
 def prob_plot_aprox():
     prob_freq1 = []
     prob_freq2 = []
@@ -308,6 +308,3 @@ def prob_plot_aprox():
     ax[2].legend(loc=(0.5, 0.01))
     plt.show()
 
-# Some Updates From MAC
-# PRivet LERA!!!!
-# DA, VONO ROBE!!!

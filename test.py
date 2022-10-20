@@ -224,11 +224,14 @@ def prob_plot_time_log(T, theta, sigma):
         prob_freq2.append(p[1])
         prob_freq3.append(p[2])
     fig, ax = plt.subplots()
-    ax.plot(T_s, prob_freq1, label="prob = x")
-    ax.plot(T_s, np.log(1 - np.array(prob_freq1)), label="log(1 -prob) = x")
+    ax.plot(T_s, prob_freq1, label="Probability of stopping time detection with a1 = 0, b1 = 0.5, θ = " + str(theta) + " and σ = " + str(sigma))
+    ax.plot(T_s, np.log(1 - np.array(prob_freq1)), label="log(1 -prob1) = f(x)")
+    ax.plot(T_s, prob_freq2, label="Probability of stopping time detection with a2 = -0.5, b2 = 0.5,  θ = " + str(theta) + " and σ = " + str(sigma))
+    ax.plot(T_s, np.log(1 - np.array(prob_freq2)), label="log(1 -prob2) = f(x)")
+    ax.plot(T_s, prob_freq3, label="Probability of stopping time detection with a3 = -0.5, b3 = 1, θ = " + str(theta) + " and σ = " + str(sigma))
+    ax.plot(T_s, np.log(1 - np.array(prob_freq3)), label="log(1 -prob3) = f(x)")
     plt.legend()
     plt.show()
-
 
 print(prob_plot_time_log(4, 1, 1))
 def prob_plot_time1(T, theta, sigma):

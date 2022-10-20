@@ -181,9 +181,12 @@ def prob_plot_time(T, theta, sigma):
     prob_e = []
     i = 0
     T_s = []
-    while i <= T:
-        i += 0.05
-        T_s.append(i)
+    dt = 0.001
+    n = int(T/dt)
+    T_s = np.linspace(0.001, T, n)
+    # while i <= T:
+    #     i += 0.05
+    #     T_s.append(i)
     for i in T_s:
         lam = dist_avr(i)
         #e = 1 - math.exp(- lam * i)
@@ -203,7 +206,7 @@ def prob_plot_time(T, theta, sigma):
     plt.plot(T_s, prob_e, color="black", label="f(x) = 1 - exp(- θ*Δ*lam/2)")
     plt.legend(loc=(0.5, 0.01))
     plt.show()
-print(prob_plot_time(10, 1, 1))
+#print(prob_plot_time(10, 1, 1))
 def prob_plot_time1(T, theta, sigma):
     prob_freq1 = []
     prob_freq2 = []
@@ -211,6 +214,9 @@ def prob_plot_time1(T, theta, sigma):
     prob_e1 = []
     prob_e2 = []
     prob_e3 = []
+    # dt = 0.01
+    # n = int(T/dt)
+    # T_s = np.linspace(0.01, T, n)
     i = 0
     T_s = []
     while i <= T:
@@ -221,17 +227,21 @@ def prob_plot_time1(T, theta, sigma):
         #dis2 = distance(0, -0.5, 0.5,i)
         #dis3 = distance(0, -0.5, 1,i)
         #e = 1 - math.exp(- lam * i)
-        e1 = 1 - math.exp((- theta * i )/2)
-        prob_e1.append(e1)
-        e2 = 1 - math.exp((- theta * i )/2)
-        prob_e2.append(e2)
-        e3 = 1 - math.exp((- theta * i )/2)
-        prob_e3.append(e3)
+        # e1 = 1 - math.exp((- theta * i )/2)
+        # prob_e1.append(e1)
+        # e2 = 1 - math.exp((- theta * i )/2)
+        # prob_e2.append(e2)
+        # e3 = 1 - math.exp((- theta * i )/2)
+        # prob_e3.append(e3)
         print('l')
         p = Monte_Carlo(100, i, theta, sigma)
         prob_freq1.append(p[0])
         prob_freq2.append(p[1])
         prob_freq3.append(p[2])
+    prob_e1 = np.log(1 - np.array(prob_freq1))
+    prob_e2 = np.log(1 - np.array(prob_freq1))
+    prob_e3 = np.log(1 - np.array(prob_freq1))
+    
     fig, ax = plt.subplots(3)
     #plt.title("Probability of stopping time detection")
     ax[0].set_xlabel('Different time Δ')
@@ -243,14 +253,15 @@ def prob_plot_time1(T, theta, sigma):
     ax[0].plot(T_s, prob_freq1, color="orange", label="Probability of stopping time detection with a1 = 0, b1 = 0.5, θ = " + str(theta) + " and σ = " + str(sigma))
     ax[1].plot(T_s, prob_freq2, color="lawngreen", label="Probability of stopping time detection with a2 = -0.5, b2 = 0.5,  θ = " + str(theta) + " and σ = " + str(sigma))
     ax[2].plot(T_s, prob_freq3, color="purple", label="Probability of stopping time detection with a3 = -0.5, b3 = 1, θ = " + str(theta) + " and σ = " + str(sigma))
-    ax[0].plot(T_s, prob_e1, color="black", label="f(x) = 1 - exp(- λ*Δ/2)")
-    ax[1].plot(T_s, prob_e2, color="black", label="f(x) = 1 - exp(- λ*Δ/2)")
-    ax[2].plot(T_s, prob_e3, color="black", label="f(x) = 1 - exp(- λ*Δ/2)")
+    ax[0].plot(T_s, prob_e1, color="black", label="f(x) = log(1 - prob1)")
+    ax[1].plot(T_s, prob_e2, color="black", label="f(x) = log(1 - prob2)")
+    ax[2].plot(T_s, prob_e3, color="black", label="f(x) = log(1 - prob3)")
+    #ax[2].plot(T_s, prob_e3, color="black", label="f(x) = 1 - exp(- λ*Δ/2)")
     ax[0].legend(loc=(0.5, 0.01))
     ax[1].legend(loc=(0.5, 0.01))
     ax[2].legend(loc=(0.5, 0.01))
     plt.show()
-#print(prob_plot_time1(10, 1, 1))
+print(prob_plot_time1(4, 1, 1))
 def prob_plot_aprox():
     prob_freq1 = []
     prob_freq2 = []

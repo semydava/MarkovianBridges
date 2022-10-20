@@ -2,6 +2,7 @@
 from imaplib import Internaldate2tuple
 import random
 import numpy as np
+import statsmodels.api as sm
 import math
 from math import sqrt
 import matplotlib.pyplot as plt
@@ -30,12 +31,12 @@ def AR(T, a, b, theta, sigma):
     for i in range(t.size - 1):
         n1 = discrete_noise()
         n2 = discrete_noise()
-        X1[i + 1] = X1[i] - theta * X1[i] * dt + sigma * np.sqrt(dt) * n1
-        X2[i + 1] = X2[i] - theta * X2[i] * dt + sigma * np.sqrt(dt) * n2
-
+        X1[i + 1] =  ((1 -  theta * dt) * X1[i]) + sigma * np.sqrt(dt) * n1
+        X2[i + 1] =  ((1 -  theta * dt) * X2[i]) + sigma * np.sqrt(dt) * n2
     X2 = X2[::-1]
     X1 = list(X1)
     X2 = list(X2)
+
     for index, (x1, x2) in enumerate(zip(X1, X2)):
         if index < len(X1) - 1:
             new_index1 = index + 1
@@ -67,18 +68,18 @@ def AR(T, a, b, theta, sigma):
         
 
         
-        #stop_time = t[stop_index]sss
+        stop_time = t[stop_index]
        
-        #fig, ax = plt.subplots(2)
+        # fig, ax = plt.subplots(2)
         # #ax[0].set_ylim(-1, 3)
         # #ax[1].set_ylim(-1, 3)
-        #ax[0].plot(t, X1, label="Process Xˆ1 which starts at a = - 0.5", color="blue")
-        #ax[0].plot(t, X2, label="Process Xˆ2 which starts at b = 1", color="orange")
-        #ax[0].plot(t[stop_index], X1[stop_index], 'ro', label= "first time processes intersect")
+        # ax[0].plot(t, X1, label="Process Xˆ1 which starts at a = - 0.5", color="blue")
+        # ax[0].plot(t, X2, label="Process Xˆ2 which starts at b = 1", color="orange")
+        # ax[0].plot(t[stop_index], X1[stop_index], 'ro', label= "first time processes intersect")
         # ax[0].legend(loc='upper center', bbox_to_anchor=(0.5, 1.25), ncol=3, fancybox=True, shadow=True)
-        #ax[1].plot(t1, z1.values(), color="blue")
-        #ax[1].plot(t2, z2.values(), color="orange")
-        #ax[1].plot(t[stop_index], X1[stop_index], 'ro', label="first time processes intersect")
+        # ax[1].plot(t1, z1.values(), color="blue")
+        # ax[1].plot(t2, z2.values(), color="orange")
+        # ax[1].plot(t[stop_index], X1[stop_index], 'ro', label="first time processes intersect")
         # ax[1].legend(loc='upper left')
         # #plt.plot(t, X1)
         # #plt.plot(t[stop_index], X1[stop_index], 'ro')
@@ -86,7 +87,7 @@ def AR(T, a, b, theta, sigma):
         # # plt.grid(True)
         # # plt.xlabel('t')
         # # plt.ylabel('X')
-        #plt.show()
+        # plt.show()
     return intersect
 #print(AR(1., 0, 0.5, 0.9, 1))
 
@@ -204,7 +205,32 @@ def prob_plot_time(T, theta, sigma):
     plt.legend(loc=(0.5, 0.01))
     plt.show()
 #print(prob_plot_time(10, 1, 1))
+def prob_plot_time_log(T, theta, sigma):
+    prob_freq1 = []
+    prob_freq2 = []
+    prob_freq3 = []
+    prob_e1 = []
+    prob_e2 = []
+    prob_e3 = []
+    i = 0
+    T_s = []
+    while i <= T:
+        i += 0.05
+        T_s.append(i)
+    for i in T_s:
+        print('l')
+        p = Monte_Carlo(45, i, theta, sigma)
+        prob_freq1.append(p[0])
+        prob_freq2.append(p[1])
+        prob_freq3.append(p[2])
+    fig, ax = plt.subplots()
+    ax.plot(T_s, prob_freq1, label="prob = x")
+    ax.plot(T_s, np.log(1 - np.array(prob_freq1)), label="log(1 -prob) = x")
+    plt.legend()
+    plt.show()
 
+
+print(prob_plot_time_log(4, 1, 1))
 def prob_plot_time1(T, theta, sigma):
     prob_freq1 = []
     prob_freq2 = []
@@ -218,21 +244,29 @@ def prob_plot_time1(T, theta, sigma):
         i += 0.1
         T_s.append(i)
     for i in T_s:
-        dis1 = distance(0, 0,i, 0.5)
-        dis2 = distance(0, -0.5, i, 0.5)
-        dis3 = distance(0, -0.5, i, 1)
-        #e = 1 - math.exp(- lam * i)
-        e1 = 1 - math.exp((- theta * i * dis1)/2)
-        prob_e1.append(e1)
-        e2 = 1 - math.exp((- theta * i * dis2)/2)
-        prob_e2.append(e2)
-        e3 = 1 - math.exp((- theta * i * dis3)/2)
-        prob_e3.append(e3)
         print('l')
-        p = Monte_Carlo(10, i, theta, sigma)
+        p = Monte_Carlo(5, i, theta, sigma)
         prob_freq1.append(p[0])
         prob_freq2.append(p[1])
         prob_freq3.append(p[2])
+    ones = np.ones(len(T_s)) - np.array(prob_freq1)
+    ones1 = np.ones(len(T_s)) - np.array(prob_freq2)
+    ones2 = np.ones(len(T_s)) - np.array(prob_freq3)
+    fit1 = np.polyfit(np.log(T_s), np.array(prob_freq1), 1)
+    fit2 = np.polyfit(np.log(T_s), np.array(prob_freq2), 1)
+    fit3 = np.polyfit(np.log(T_s), np.array(prob_freq3), 1)
+    log_reg1 = sm.Logit(1 - np.array(prob_freq1), T_s).fit()
+    log_reg2 = sm.Logit(1 - np.array(prob_freq2), T_s).fit()
+    log_reg3 = sm.Logit(1 - np.array(prob_freq3), T_s).fit()
+    print(log_reg1.params)
+    for i in T_s:
+        e1 = 1 - math.exp(( (log_reg1.params[0]) * i) / 2)
+        e2 = 1 - math.exp(((log_reg2.params[0]) * i) / 2)
+        e3 = 1 - math.exp(((log_reg3.params[0]) * i) / 2)
+        prob_e1.append(e1)
+        prob_e2.append(e2)
+        prob_e3.append(e3)
+
     fig, ax = plt.subplots(3)
     #plt.title("Probability of stopping time detection")
     ax[0].set_xlabel('Different time Δ')
@@ -241,17 +275,26 @@ def prob_plot_time1(T, theta, sigma):
     ax[1].set_ylabel('Probability')
     ax[2].set_xlabel('Different time Δ')
     ax[2].set_ylabel('Probability')
-    ax[0].plot(T_s, prob_freq1, color="orange", label="Probability of stopping time detection with a1 = 0, b1 = 0.5, θ = " + str(theta) + " and σ = " + str(sigma))
-    ax[1].plot(T_s, prob_freq2, color="lawngreen", label="Probability of stopping time detection with a2 = -0.5, b2 = 0.5,  θ = " + str(theta) + " and σ = " + str(sigma))
-    ax[2].plot(T_s, prob_freq3, color="purple", label="Probability of stopping time detection with a3 = -0.5, b3 = 1, θ = " + str(theta) + " and σ = " + str(sigma))
-    ax[0].plot(T_s, prob_e1, color="black", label="f(x) = 1 - exp(- λ*Δ/2)")
-    ax[1].plot(T_s, prob_e2, color="black", label="f(x) = 1 - exp(- λ*Δ/2)")
-    ax[2].plot(T_s, prob_e3, color="black", label="f(x) = 1 - exp(- λ*Δ/2)")
+    ax[0].plot(np.log(T_s), np.log(1 - np.array(prob_freq1)), color="orange",label="Probability of stopping time detection with a1 = 0, b1 = 0.5, θ = " + str(theta) + " and σ = " + str(sigma))
+    #ax[0].plot(T_s, np.log(prob_freq1), color="orange", label="Log of Probability of stopping time detection with a1 = 0, b1 = 0.5, θ = " + str(theta) + " and σ = " + str(sigma))
+    ax[1].plot(np.log(T_s), np.log(1 - np.array(prob_freq2)), color="lawngreen", label="Probability of stopping time detection with a2 = -0.5, b2 = 0.5,  θ = " + str(theta) + " and σ = " + str(sigma))
+    #ax[1].plot(T_s, np.log(prob_freq2), color="lawngreen", label="Log of Probability of stopping time detection with a2 = -0.5, b2 = 0.5,  θ = " + str(theta) + " and σ = " + str(sigma))
+    ax[2].plot(np.log(T_s), np.log(1 - np.array(prob_freq3)), color="purple", label="Probability of stopping time detection with a3 = -0.5, b3 = 1, θ = " + str(theta) + " and σ = " + str(sigma))
+    #ax[2].plot(T_s, np.log(prob_freq3), color="purple", label="Log of Probability of stopping time detection with a3 = -0.5, b3 = 1, θ = " + str(theta) + " and σ = " + str(sigma))
+    # ax[0].plot(T_s, [fit1[0] for i in T_s], color = "black")
+    # ax[1].plot(T_s, [fit2[0] for i in T_s], color="black")
+    # ax[2].plot(T_s, [fit3[0] for i in T_s], color="black")
+    #ax[0].plot(T_s, [fit1[1] for i in T_s], color = "black")
+    #ax[0].plot(T_s, prob_e1[0], color="black", label="f(x) = 1 - exp(- λ*Δ/2)")
+    #ax[0].plot(T_s, prob_e1, color="black", label=" f(x) = 1 - exp(- m*Δ/2)" )
+    #ax[1].plot(T_s, prob_e2, color="black", label=" f(x) = 1 - exp(- m*Δ/2)")
+    #ax[1].plot(T_s, prob_e2, color="black", label="f(x) = 1 - exp(- λ*Δ/2)")
+    #ax[2].plot(T_s, prob_e3, color="black", label="f(x) = 1 - exp(- m*Δ/2)")
     ax[0].legend(loc=(0.5, 0.01))
     ax[1].legend(loc=(0.5, 0.01))
     ax[2].legend(loc=(0.5, 0.01))
     plt.show()
-print(prob_plot_time1(10, 1, 1))
+#print(prob_plot_time1(10, 1, 1))
 def prob_plot_aprox():
     prob_freq1 = []
     prob_freq2 = []
@@ -308,3 +351,13 @@ def prob_plot_aprox():
     ax[2].legend(loc=(0.5, 0.01))
     plt.show()
 
+# fig, ax = plt.subplots()
+# n = int(10/0.1)
+# x = np.linspace(0, 10, n)
+# c = 2
+# y= 1-np.exp(-c*x)
+# print(np.polyfit(x, np.array(y), 1))
+# ax.plot(x,y, label= "y = x")
+# ax.plot(x,np.log(1-y), label= "log(1 -y) = x")
+# plt.legend()
+# plt.show()

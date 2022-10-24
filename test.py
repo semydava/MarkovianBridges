@@ -1,11 +1,14 @@
 #from cmath import sqrt
 from imaplib import Internaldate2tuple
 import random
+from socket import TCP_SYNCNT
 import numpy as np
 import statsmodels.api as sm
 import math
 from math import sqrt
+from scipy import stats
 import matplotlib.pyplot as plt
+from functools import lru_cache
 from decimal import *
 def discrete_noise():
     prob = random.uniform(0, 1)
@@ -107,9 +110,30 @@ def Monte_Carlo_sigma(sim_n,sigma):
     prob_inter2 = (count2 / sim_n)
     prob_inter3 = (count3 / sim_n)
 
-    return [prob_inter1, prob_inter2, prob_inter3]  
+    return [prob_inter1, prob_inter2, prob_inter3] 
 
+@lru_cache(maxsize=None)
+def Monte_Carlo_theta(sim_n,T, a, b):
+    count1 = 0
+    count2 = 0
+    count3 = 0
 
+    for i in range(sim_n):
+        inter1 = AR(T, a, b, 1, 1)
+        inter2 = AR(T, a, b, 0.5, 0.8)
+        inter3 = AR(T, a, b, 0.9, 1.2)
+        count1 += inter1
+        count2 += inter2
+        count3 += inter3
+   
+
+    prob_inter1 = (count1 / sim_n)
+    prob_inter2 = (count2 / sim_n)
+    prob_inter3 = (count3 / sim_n)
+
+    return [prob_inter1, prob_inter2, prob_inter3] 
+
+@lru_cache(maxsize=None)
 def Monte_Carlo(sim_n,T, theta, sigma):
     count1 = 0
     count2 = 0
@@ -172,9 +196,6 @@ def dist_avr(T):
         
     return avrg
 
-
-
-
 def prob_plot_time(T, theta, sigma):
     prob_freq1 = []
     prob_freq2 = []
@@ -214,28 +235,127 @@ def prob_plot_time_log(T, theta, sigma):
     prob_e3 = []
     i = 0
     T_s = []
-    while i <= T:
+    while i <= (T - 0.05):
         i += 0.05
         T_s.append(i)
+    print(len(T_s))
     for i in T_s:
         print('l')
-        p = Monte_Carlo(1000, i, theta, sigma)
+        p = Monte_Carlo(1500, i, theta, sigma)
         prob_freq1.append(p[0])
         prob_freq2.append(p[1])
         prob_freq3.append(p[2])
+        
+    prob_log1 = np.log(1 - np.array(prob_freq1))
+    prob_log2 = np.log(1 - np.array(prob_freq2))
+    prob_log3 = np.log(1 - np.array(prob_freq3))
+    linregres1 = stats.linregress(T_s, prob_log1)
+    linregres2 = stats.linregress(T_s, prob_log2)
+    linregres3 = stats.linregress(T_s, prob_log3)
+    print(linregres1.slope, linregres2.slope, linregres3.slope)
+    # fit1 = np.polyfit(T_s, prob_log1, 1)
+    # fit2 = np.polyfit(T_s, prob_log2, 1)
+    # fit3 = np.polyfit(T_s, prob_log3, 1)
+    # print(fit1[0], fit2[0], fit3[0])
+    # for i in T_s:
+    #     e1 = 1 - math.exp(( - 2.1 * i) )
+    #     e2 = 1 - math.exp((- 1.3 * i) )
+    #     e3 = 1 - math.exp(( - 0.72 * i) )
+    #     prob_e1.append(e1)
+    #     prob_e2.append(e2)
+    #     prob_e3.append(e3)
     fig, ax = plt.subplots()
     ax.set_xlabel('Different time Δ')
     ax.set_ylabel('Probability')
     ax.plot(T_s, prob_freq1, color="orange", label="Probability of stopping time detection with a1 = 0, b1 = 0.5, θ = " + str(theta) + " and σ = " + str(sigma))
-    ax.plot(T_s, np.log(1 - np.array(prob_freq1)), color="orange", label="log(1 -prob1) = f(x)")
+    # ax.plot(T_s, prob_log1, color="orange", label="log(1 - prob1) = f(x)")
+    # ax.plot(T_s, linregres1.intercept + linregres1.slope*np.array(T_s), color = 'darkgoldenrod', label = "fitted line 1")
+    # ax.plot(T_s, (- 1.24)*np.array(T_s),  color="black", label="OLS " )
+    # ax.plot(T_s, prob_e1, color="orange", linestyle = 'dotted', label="f(x) = 1 - exp(- slope*Δ)")
     ax.plot(T_s, prob_freq2, color="lawngreen", label="Probability of stopping time detection with a2 = -0.5, b2 = 0.5,  θ = " + str(theta) + " and σ = " + str(sigma))
-    ax.plot(T_s, np.log(1 - np.array(prob_freq2)), color="lawngreen", label="log(1 -prob2) = f(x)")
+    # ax.plot(T_s, prob_e2, color="lawngreen", linestyle = 'dotted', label="f(x) = 1 - exp(- slope*Δ)")
+    # ax.plot(T_s, prob_log2, color="lawngreen", label="log(1 - prob2) = f(x)")
+    # ax.plot(T_s, linregres2.intercept + linregres2.slope*np.array(T_s), color = 'darkolivegreen', label = "fitted line 2")
+    # ax.plot(T_s,(- 1.16)*np.array(T_s), color="black", label="OLS")
     ax.plot(T_s, prob_freq3, color="purple", label="Probability of stopping time detection with a3 = -0.5, b3 = 1, θ = " + str(theta) + " and σ = " + str(sigma))
-    ax.plot(T_s, np.log(1 - np.array(prob_freq3)), color="purple", label="log(1 -prob3) = f(x)")
+    # ax.plot(T_s, prob_log3, color="purple", label="log(1 - prob3) = f(x)")
+    # ax.plot(T_s, linregres3.intercept + linregres3.slope*np.array(T_s), color = 'slateblue', label = "fitted line 3")
+    # ax.plot(T_s, (- 1.065)*np.array(T_s), color="black", label="OLS")
+    # ax.plot(T_s, prob_e3, color="purple", linestyle = 'dotted', label="f(x) = 1 - exp(- slope*Δ)")
+    ax.legend(bbox_to_anchor=(0., 1.03, 1., .102), loc=3, ncol=3, mode="expand", borderaxespad=0.)
     plt.legend()
     plt.show()
-
-print(prob_plot_time_log(4, 1, 1))
+# print(prob_plot_time_log(4, 1, 1))
+def prob_plot_time_theta_log(T, a, b):
+    prob_freq1 = []
+    prob_freq2 = []
+    prob_freq3 = []
+    prob_e1 = []
+    prob_e2 = []
+    prob_e3 = []
+    i = 0
+    T_s = []
+    while i <= (T - 0.05):
+        i += 0.05
+        T_s.append(i)
+    print(len(T_s))
+    T_s = np.array(T_s)
+    for i in T_s:
+        print('l')
+        p = Monte_Carlo_theta(500, i, a, b)
+        prob_freq1.append(p[0])
+        prob_freq2.append(p[1])
+        prob_freq3.append(p[2])
+        
+    prob_log1 = np.log(1 - np.array(prob_freq1))
+    prob_log2 = np.log(1 - np.array(prob_freq2))
+    prob_log3 = np.log(1 - np.array(prob_freq3))
+    linregres1 = stats.linregress(T_s, prob_log1)
+    linregres2 = stats.linregress(T_s, prob_log2)
+    linregres3 = stats.linregress(T_s, prob_log3)
+    print(linregres1.slope, linregres1.intercept, linregres2.slope, linregres2.intercept, linregres3.slope, linregres3.intercept)
+    # fit1 = np.polyfit(T_s, prob_log1, 1)
+    # fit2 = np.polyfit(T_s, prob_log2, 1)
+    # fit3 = np.polyfit(T_s, prob_log3, 1)
+    # print(fit1[0], fit2[0], fit3[0])
+    for i in T_s:
+        e1 = 1 - math.exp(( - 1 * i) )
+        e2 = 1 - math.exp((- 0.5 * i) )
+        e3 = 1 - math.exp(( - 1.5 * i) )
+        prob_e1.append(e1)
+        prob_e2.append(e2)
+        prob_e3.append(e3)
+    fig, ax = plt.subplots()
+    # ax.set_xlabel('Different time Δ')
+    # ax.set_ylabel('Log of 1 - Probability')
+    ax.set_xlabel('Different time Δ')
+    ax.set_ylabel('Probability')
+    ax.plot(T_s, prob_freq1, color="orange", linestyle = "dashed", label="Probability of stopping time detection with a = " + str(a) + ", b = " + str(b) +  ", θ1 = 1, σ1 = 1")
+    # ax.plot(T_s, prob_log1, color="orange", linestyle = "dashed", label="Log of difference between 1 and Probability with a = " + str(a) + ", b = " + str(b) +  ", θ1 = 1, σ1 = 1")
+    # ax.plot(T_s, linregres1.intercept + linregres1.slope*np.array(T_s), color = 'darkgoldenrod', label = "Fitted line 1 with slope = " + str(round(linregres1.slope, 2)))
+    # ax.plot(T_s, fit1[0]*np.array(T_s),  color="darkgoldenrod", label="OLS " )
+    # ax.plot(T_s, prob_e1, color="darkgoldenrod",  label="f(x) = 1 - exp(- theta1*Δ)")
+    # ax.plot(T_s, 1 - np.exp(-1/2 * T_s), color="darkgoldenrod", linestyle = 'dotted', label="f(x) = 1 - exp(- theta1/2*Δ)")
+    ax.plot(T_s, 1 - np.exp(linregres1.slope * T_s), color="darkgoldenrod",  label="f(x) = 1 - exp(" + str(round(linregres1.slope, 2)) + "*Δ)")
+    ax.plot(T_s, prob_freq2, color="lawngreen", linestyle = "dashed", label="Probability of stopping time detection with a = " + str(a) + ", b = " + str(b) +  ", θ2 = 0.5, σ2 = 0.8")
+    # ax.plot(T_s, prob_e2, color="darkolivegreen", label="f(x) = 1 - exp(- theta2*Δ)")
+    # ax.plot(T_s, 1 - np.exp(-0.5/2 * T_s), color="blue", linestyle = 'dotted', label="f(x) = 1 - exp(- theta2/2*Δ)")
+    ax.plot(T_s, 1 - np.exp(linregres2.slope * T_s), color="darkolivegreen",  label="f(x) = 1 - exp(" + str(round(linregres2.slope, 2)) + "*Δ)")
+    # ax.plot(T_s, prob_log2, color="lawngreen", linestyle = "dashed", label="Log of difference between 1 and Probability with a = " + str(a) + ", b = " + str(b) +  ", θ2 = 0.5, σ2 = 0.8")
+    # ax.plot(T_s, linregres2.intercept + linregres2.slope*np.array(T_s), color = 'darkolivegreen', label = "Fitted line 2 with slope = " + str(round(linregres2.slope, 2)))
+    # ax.plot(T_s,fit2[0]*np.array(T_s), color="darkolivegreen", label="OLS")
+    ax.plot(T_s, prob_freq3, color="purple", linestyle = "dashed", label="Probability of stopping time detection with a = " + str(a) + " and b = " + str(b) +  ", θ3 = 0.9  and σ3 = 1.2")
+    # ax.plot(T_s, prob_log3, color="purple", linestyle = "dashed", label="Log of difference between 1 and Probability with a = " + str(a) + " , b = " + str(b) +  ", θ3 = 0.9, σ3 = 1.2")
+    # ax.plot(T_s, linregres3.intercept + linregres3.slope*np.array(T_s), color = 'slateblue', label = "Fitted line 3 with slope = " + str(round(linregres3.slope,2)))
+    # ax.plot(T_s, fit3[0]*np.array(T_s), color="slateblue", label="OLS")
+    # ax.plot(T_s, prob_e3, color="slateblue", label="f(x) = 1 - exp(- theta3*Δ)")
+    # ax.plot(T_s, 1 - np.exp(-1.5/2 * T_s), color="slateblue", linestyle = 'dotted', label="f(x) = 1 - exp(- theta3/2*Δ)")
+    ax.plot(T_s, 1 - np.exp(linregres3.slope * T_s), color="slateblue",  label="f(x) = 1 - exp(" + str(round(linregres3.slope,2)) + "*Δ)")
+    # ax.legend(bbox_to_anchor=(0., 1.03, 1., .102), loc=3, ncol=3, mode="expand", borderaxespad=0.)
+    ax.legend(bbox_to_anchor=(0., 1.03, 1., .102), loc=3, ncol=3, mode="expand", borderaxespad=0.)
+    # plt.legend()
+    plt.show()
+print(prob_plot_time_theta_log(4, 0, 1))
 def prob_plot_time1(T, theta, sigma):
     prob_freq1 = []
     prob_freq2 = []
